@@ -27,7 +27,6 @@ python-dateutil>=2.8.0
 pytz>=2023.3
 
 # Additional utilities
-hashlib
 json5>=0.9.14
 regex>=2023.6.3
 
