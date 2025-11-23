@@ -29,20 +29,3 @@ pytz>=2023.3
 # Additional utilities
 json5>=0.9.14
 regex>=2023.6.3
-
-# For enhanced features (optional but recommended)
-wordcloud>=1.9.2
-networkx>=3.1
-scipy>=1.11.0
-
-# For knowledge base embeddings (optional)
-sentence-transformers>=2.2.2
-faiss-cpu>=1.7.4
-
-# API and web features (if needed)
-requests>=2.31.0
-urllib3>=2.0.0
-
-# Performance optimization
-numba>=0.57.0
-cython>=3.0.0
