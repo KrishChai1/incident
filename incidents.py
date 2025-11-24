@@ -1002,7 +1002,7 @@ def main():
             )
             
             if uploaded_files:
-                if st.button("🔄 Process Files", type="primary", use_container_width=True):
+                if st.button("🔄 Process Files", type="primary", width="stretch"):
                     progress = st.progress(0)
                     status = st.empty()
                     
@@ -1070,7 +1070,7 @@ def main():
                     critical = all_tickets['priority'].str.lower().isin(['critical', 'high', '1', 'p1']).sum()
                     st.metric("Critical Issues", critical)
             
-            if st.button("🗑️ Clear All Data", use_container_width=True):
+            if st.button("🗑️ Clear All Data", width="stretch"):
                 st.session_state.tickets_data = {}
                 st.rerun()
     
@@ -1168,7 +1168,7 @@ def main():
                         "Priority vs Category Heatmap"
                     )
                     if heatmap_fig:
-                        st.plotly_chart(heatmap_fig, use_container_width=True)
+                        st.plotly_chart(heatmap_fig, width="stretch")
                 elif 'priority' in all_tickets.columns:
                     priority_counts = all_tickets['priority'].value_counts()
                     fig = px.pie(
@@ -1177,7 +1177,7 @@ def main():
                         title="Priority Distribution",
                         color_discrete_sequence=px.colors.sequential.RdBu
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
             
             with viz_col2:
                 path_cols = []
@@ -1192,7 +1192,7 @@ def main():
                         "Ticket Hierarchy"
                     )
                     if sunburst_fig:
-                        st.plotly_chart(sunburst_fig, use_container_width=True)
+                        st.plotly_chart(sunburst_fig, width="stretch")
                 elif 'category' in all_tickets.columns:
                     category_counts = all_tickets['category'].value_counts().head(10)
                     fig = px.bar(
@@ -1203,7 +1203,7 @@ def main():
                         color=category_counts.values,
                         color_continuous_scale='Viridis'
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
         
         with tabs[1]:  # Root Cause Analysis
             st.header("🔍 Advanced Root Cause Analysis")
@@ -1241,7 +1241,7 @@ def main():
                             color=list(patterns.values()),
                             color_continuous_scale='Turbo'
                         )
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width="stretch")
                 else:
                     st.info("No root cause data available")
             else:
@@ -1293,7 +1293,7 @@ def main():
                         yaxis_title="Ticket Count",
                         hovermode='x unified'
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
                 else:
                     st.info("Not enough date data for volume anomaly detection")
                 
@@ -1360,13 +1360,13 @@ def main():
                         yaxis_title="Compliance %",
                         showlegend=True
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
                     
                     # Show breaches
                     if breached_sla > 0:
                         st.subheader("🚨 SLA Breaches")
                         breaches = sla_df[sla_df['compliance'] == 'Breach'].sort_values('breach_hours', ascending=False).head(10)
-                        st.dataframe(breaches, use_container_width=True)
+                        st.dataframe(breaches, width="stretch")
                 else:
                     st.info("No SLA data available")
             else:
@@ -1397,7 +1397,7 @@ def main():
                     
                     if key_tickets:
                         key_df = pd.DataFrame(key_tickets, columns=['Ticket ID', 'Centrality Score'])
-                        st.dataframe(key_df, use_container_width=True)
+                        st.dataframe(key_df, width="stretch")
                 else:
                     st.info("Not enough data for network analysis")
             else:
@@ -1420,7 +1420,7 @@ def main():
                         color=sentiment_counts.index,
                         color_discrete_map=colors
                     )
-                    st.plotly_chart(fig, use_container_width=True)
+                    st.plotly_chart(fig, width="stretch")
                 
                 with sent_col2:
                     if 'category' in all_tickets.columns:
@@ -1434,7 +1434,7 @@ def main():
                             color=sentiment_by_category.values,
                             color_continuous_scale='RdYlGn'
                         )
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width="stretch")
                 
                 # Most negative tickets - FIXED with safe column access
                 if 'sentiment_score' in all_tickets.columns:
@@ -1446,15 +1446,19 @@ def main():
                         ['ticket_id', 'title', 'sentiment_score', 'priority', 'category', 'description']
                     )
                     
-                    if 'sentiment_score' in display_columns:
+                    # Only proceed if we have sentiment_score and at least one other column to display
+                    if 'sentiment_score' in display_columns and len(display_columns) > 1:
                         try:
                             negative_tickets = all_tickets.nsmallest(5, 'sentiment_score')
-                            if not negative_tickets.empty and display_columns:
-                                st.dataframe(negative_tickets[display_columns], use_container_width=True)
+                            if not negative_tickets.empty:
+                                # Only select columns that actually exist
+                                st.dataframe(negative_tickets[display_columns], width='stretch')
                             else:
                                 st.info("No negative tickets found")
-                        except:
-                            st.info("Unable to identify most negative tickets")
+                        except Exception as e:
+                            st.info(f"Unable to display negative tickets. Available columns: {', '.join(display_columns)}")
+                    else:
+                        st.info("Not enough data columns available for sentiment analysis display")
             else:
                 st.info("Sentiment analysis not available. Enable it in settings and ensure tickets have descriptions.")
         
@@ -1469,15 +1473,15 @@ def main():
                 quick_cols = st.columns(3)
                 
                 with quick_cols[0]:
-                    if st.button("What are the main issues?", use_container_width=True):
+                    if st.button("What are the main issues?", width="stretch"):
                         st.session_state.ai_question = "What are the main issues and problems in the ticket data?"
                 
                 with quick_cols[1]:
-                    if st.button("How to reduce tickets?", use_container_width=True):
+                    if st.button("How to reduce tickets?", width="stretch"):
                         st.session_state.ai_question = "How can we reduce ticket volume based on the patterns?"
                 
                 with quick_cols[2]:
-                    if st.button("What needs attention?", use_container_width=True):
+                    if st.button("What needs attention?", width="stretch"):
                         st.session_state.ai_question = "What issues need immediate attention?"
                 
                 # Chat interface
@@ -1488,7 +1492,7 @@ def main():
                     height=100
                 )
                 
-                if st.button("🚀 Ask AI Agent", type="primary", use_container_width=True):
+                if st.button("🚀 Ask AI Agent", type="primary", width="stretch"):
                     if user_question:
                         with st.spinner("AI is analyzing..."):
                             # Prepare context
@@ -1548,7 +1552,7 @@ def main():
                             hovermode='x unified'
                         )
                         
-                        st.plotly_chart(fig, use_container_width=True)
+                        st.plotly_chart(fig, width="stretch")
                         
                         # Prediction summary
                         pred_cols = st.columns(3)
@@ -1609,7 +1613,7 @@ def main():
                                 title="Priority Trends Over Time",
                                 markers=True
                             )
-                            st.plotly_chart(fig, use_container_width=True)
+                            st.plotly_chart(fig, width="stretch")
                         else:
                             st.info("Not enough data for timeline")
                     except:
